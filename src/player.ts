@@ -1,6 +1,6 @@
 import type { Note, Tempo } from './musicxml'
 
-export type Track = { notes: Note[]; gain: number }
+export type Track = { notes: Note[]; gain: number; wave?: OscillatorType }
 export type PlayOptions = { tempos: Tempo[]; speed: number; from: number; to: number; countIn?: number; click?: boolean; onEnd?: () => void }
 
 // 拍 ↔ 秒（從第 0 拍起算，依速度表分段計算；負的拍數用第一個速度）
@@ -62,7 +62,7 @@ export class Player {
         if (n.midi === null || n.start + n.dur <= o.from || n.start >= o.to) continue
         const s = Math.max(n.start, o.from)
         const e = Math.min(n.start + n.dur, o.to)
-        this.tone(ctx, freq(n.midi), this.at(s), this.at(e) - this.at(s), tr.gain)
+        this.tone(ctx, freq(n.midi), this.at(s), this.at(e) - this.at(s), tr.gain, tr.wave)
       }
     this.playing = true
     this.timer = setTimeout(() => {
@@ -89,10 +89,10 @@ export class Player {
     return this.t0 + (beatToSec(this.tempos, beat) - beatToSec(this.tempos, this.from)) / this.speed
   }
 
-  private tone(ctx: AudioContext, f: number, t: number, d: number, g: number) {
+  private tone(ctx: AudioContext, f: number, t: number, d: number, g: number, wave: OscillatorType = 'triangle') {
     const osc = ctx.createOscillator()
     const amp = ctx.createGain()
-    osc.type = 'triangle'
+    osc.type = wave
     osc.frequency.value = f
     const attack = Math.min(0.02, d / 3)
     const release = Math.min(0.05, d / 3)

@@ -45,7 +45,10 @@ export function Practice({ mode, tempos, mine, others, phrases }: Props) {
     const tracks: Track[] =
       mode === 'melody'
         ? rest ? [] : [{ notes: mine, gain: 0.3 }]
-        : [...others.map((notes) => ({ notes, gain: 0.12 })), ...(withSelf ? [{ notes: mine, gain: 0.25 }] : [])]
+        : withSelf
+          ? // 自己的聲部用方波、其他聲部壓小聲，才聽得出來
+            [...others.map((notes) => ({ notes, gain: 0.05 })), { notes: mine, gain: 0.2, wave: 'square' as const }]
+          : others.map((notes) => ({ notes, gain: 0.12 }))
     setSinging(rest)
     player.current.play(tracks, {
       tempos,
