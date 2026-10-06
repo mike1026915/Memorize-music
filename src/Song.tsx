@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { parseMusicXML, type Note, type Score } from './musicxml'
 import { splitPhrases } from './phrases'
 import { Lyrics } from './Lyrics'
+import { Lesson } from './Lesson'
 import { Practice } from './Practice'
 
 export type PartRef = { part: string; voice: number | string }
@@ -18,8 +19,9 @@ type SongMeta = {
 export const notesOf = (score: Score, ref: PartRef): Note[] | undefined =>
   score.parts.find((p) => p.id === ref.part)?.voices[String(ref.voice)]
 
-type Tab = 'lyrics' | 'melody' | 'choir'
+type Tab = 'lesson' | 'lyrics' | 'melody' | 'choir'
 const TABS: [Tab, string][] = [
+  ['lesson', '闖關'],
   ['lyrics', '歌詞'],
   ['melody', '旋律'],
   ['choir', '合唱/進拍'],
@@ -30,7 +32,7 @@ export function Song({ id, voice }: { id: string; voice: string }) {
   const [meta, setMeta] = useState<SongMeta | null>(null)
   const [score, setScore] = useState<Score | null>(null)
   const [error, setError] = useState('')
-  const [tab, setTab] = useState<Tab>('lyrics')
+  const [tab, setTab] = useState<Tab>('lesson')
 
   useEffect(() => {
     fetch(base + 'song.json')
@@ -55,7 +57,7 @@ export function Song({ id, voice }: { id: string; voice: string }) {
   const mine = score && ref ? notesOf(score, ref) : undefined
   const phrases = mine ? splitPhrases(mine) : []
   const lines = mine ? phrases.map((p) => p.text).filter(Boolean) : (meta.lyrics?.[voice] ?? '').split('\n').map((l) => l.trim()).filter(Boolean)
-  const tabs = TABS.filter(([t]) => t === 'lyrics' || mine)
+  const tabs = TABS.filter(([t]) => t === 'lesson' || t === 'lyrics' || mine)
   const audio = Object.entries(meta.audio ?? {}).sort(([a], [b]) => Number(b === voice) - Number(a === voice))
 
   return (
@@ -98,8 +100,9 @@ export function Song({ id, voice }: { id: string; voice: string }) {
         </nav>
       )}
 
+      {tab === 'lesson' && <Lesson storageKey={`lyrics:${id}:${voice}`} lines={lines} phrases={phrases} tempos={score?.tempos} />}
       {tab === 'lyrics' && <Lyrics storageKey={`lyrics:${id}:${voice}`} lines={lines} />}
-      {tab !== 'lyrics' && score && mine && (
+      {(tab === 'melody' || tab === 'choir') && score && mine && (
         <Practice
           key={tab}
           mode={tab}

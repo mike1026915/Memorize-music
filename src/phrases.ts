@@ -2,7 +2,7 @@ import type { Note } from './musicxml'
 
 export type Phrase = { start: number; end: number; notes: Note[]; text: string }
 
-const CJK = /[㐀-鿿豈-﫿]/
+export const CJK = /[㐀-鿿豈-﫿]/
 
 // 休止 ≥ 1 拍就斷句；短休止（例如斷奏的八分休止符）只在這句已經唱滿 4 拍時才斷。
 // ponytail: 規則很陽春，斷得不好再到 song.json 加手動斷句

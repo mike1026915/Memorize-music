@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { load, save } from './storage'
 import { Song } from './Song'
+import { liveStreak, type Streak } from './quiz'
 
 export type SongEntry = { id: string; title: string; hasScore: boolean; voices: string[] }
 
@@ -37,6 +38,7 @@ export function App() {
         <a href="#/" className="brand">
           背譜小幫手
         </a>
+        {!songId && <span className="streak">🔥 {liveStreak(load<Streak>('streak', { day: '', n: 0 }))}</span>}
         <select aria-label="聲部" value={voice} onChange={(e) => pickVoice(e.target.value)}>
           {voices.map((v) => (
             <option key={v}>{v}</option>

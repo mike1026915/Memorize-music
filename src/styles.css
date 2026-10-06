@@ -118,3 +118,22 @@ button.link { min-height: 0; padding: 0; border: 0; background: none; color: var
 .media label { display: grid; gap: 4px; font-size: 0.9rem; color: var(--muted); }
 .media audio { width: 100%; }
 details { margin: 8px 0; font-size: 0.9rem; }
+
+.streak { margin-left: auto; margin-right: 10px; font-weight: 700; color: var(--warn); }
+.lesson-start, .lesson-done { text-align: center; margin-top: 24px; }
+.lesson-done .big { font-size: 4rem; }
+.lesson-done h2 { margin: 0; }
+.progress { height: 14px; border-radius: 7px; background: var(--line); overflow: hidden; margin: 8px 0 16px; }
+.progress div { height: 100%; background: var(--ok); transition: width 0.3s; }
+.prompt { font-size: 1.3rem; font-weight: 700; letter-spacing: 0.05em; margin: 4px 0 16px; }
+.options { display: grid; gap: 10px; }
+.options button { min-height: 52px; font-size: 1.1rem; text-align: left; border-width: 2px; border-bottom-width: 4px; }
+.options button.right { border-color: var(--ok); color: var(--ok); }
+.options button.wrong { border-color: var(--miss); color: var(--miss); }
+.feedback { display: grid; gap: 8px; margin-top: 16px; padding: 14px; border-radius: 12px; }
+.feedback.right { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+.feedback.wrong { background: color-mix(in srgb, var(--miss) 18%, transparent); color: var(--miss); }
+.feedback button { min-height: 48px; color: #fff; border: 0; }
+.feedback.right button { background: var(--ok); }
+.feedback.wrong button { background: var(--miss); }
+.listen { display: block; width: 100%; min-height: 64px; font-size: 1.3rem; margin: 4px 0 16px; background: var(--accent-soft); border-color: var(--accent); }
