@@ -1,0 +1,9 @@
+{
+  "title": "背譜練習曲（示範）",
+  "score": "score.musicxml",
+  "parts": {
+    "Bass 1": { "part": "P2", "voice": 1 },
+    "Bass 2": { "part": "P2", "voice": 2 },
+    "Tenor": { "part": "P1", "voice": 1 }
+  }
+}

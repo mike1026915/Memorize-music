@@ -1,0 +1,33 @@
+[
+  {
+    "id": "demo",
+    "title": "背譜練習曲（示範）",
+    "hasScore": true,
+    "voices": [
+      "Bass 1",
+      "Bass 2",
+      "Tenor"
+    ]
+  },
+  {
+    "id": "demo-lyrics",
+    "title": "只有歌詞的示範",
+    "hasScore": false,
+    "voices": [
+      "Bass 1",
+      "Bass 2"
+    ]
+  },
+  {
+    "id": "愛情騙子跳恰恰",
+    "title": "愛情騙子跳恰恰",
+    "hasScore": true,
+    "voices": [
+      "Solo",
+      "Tenor 1",
+      "Tenor 2",
+      "Bass 1",
+      "Bass 2"
+    ]
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "title": "愛情騙子跳恰恰",
+  "score": "愛情騙子跳恰恰.musicxml",
+  "parts": {
+    "Solo": { "part": "P1", "voice": 1 },
+    "Tenor 1": { "part": "P2", "voice": 1 },
+    "Tenor 2": { "part": "P3", "voice": 1 },
+    "Bass 1": { "part": "P4", "voice": 1 },
+    "Bass 2": { "part": "P5", "voice": 1 }
+  },
+  "accompaniment": [
+    { "part": "P6", "voice": 1 },
+    { "part": "P6", "voice": 5 }
+  ]
+}
