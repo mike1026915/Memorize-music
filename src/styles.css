@@ -137,3 +137,4 @@ details { margin: 8px 0; font-size: 0.9rem; }
 .feedback.right button { background: var(--ok); }
 .feedback.wrong button { background: var(--miss); }
 .listen { display: block; width: 100%; min-height: 64px; font-size: 1.3rem; margin: 4px 0 16px; background: var(--accent-soft); border-color: var(--accent); }
+.due { color: var(--accent); font-weight: 700; }

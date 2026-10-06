@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Note } from './musicxml'
 import type { Phrase } from './phrases'
-import { bumpStreak, makeLesson, pieces } from './quiz'
+import { addDays, bumpStreak, makeLesson, pieces, review } from './quiz'
 
 describe('lesson', () => {
   const lines = ['我愛你', '你愛我', '副歌來了', '我愛你', '再見了朋友', 'hello my friend']
@@ -36,6 +36,21 @@ describe('lesson', () => {
       const q = makeLesson(lines, {}, Math.random, phrases).find((q) => q.melody && q.answer === '第一段歌詞')!
       expect(q.options.sort()).toEqual(['副歌高音', '第一段歌詞'])
     }
+  })
+
+  it('間隔重複：答對間隔加倍、答錯隔天，到期的句子優先出題', () => {
+    const c1 = review(undefined, true, '2026-10-06')
+    expect(c1).toEqual({ box: 0, due: '2026-10-07' })
+    const c2 = review(c1, true, '2026-10-07')
+    expect(c2).toEqual({ box: 1, due: '2026-10-09' })
+    expect(review(review(c2, true, '2026-10-09'), true, '2026-10-13').due).toBe('2026-10-21')
+    expect(review(c2, false, '2026-10-09')).toEqual({ box: 0, due: '2026-10-10' })
+    expect(addDays('2026-12-31', 1)).toBe('2027-01-01')
+
+    const many = ['一一', '二二', '三三', '四四', '五五', '六六', '七七']
+    const srs = { 一一: { box: 2, due: '2026-10-20' }, 七七: { box: 0, due: '2026-10-06' } }
+    const picked = new Set(makeLesson(many, {}, Math.random, [], srs, '2026-10-06').map((q) => q.line))
+    expect(picked).toEqual(new Set(['七七', '二二', '三三', '四四', '五五']))
   })
 
   it('連續天數', () => {

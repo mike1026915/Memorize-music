@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import type { Tempo } from './musicxml'
 import type { Phrase } from './phrases'
 import { Player } from './player'
-import { bumpStreak, makeLesson, today, yesterday, type Marks, type Question, type Streak } from './quiz'
+import { bumpStreak, dueCount, makeLesson, review, today, yesterday, type Marks, type Question, type Srs, type Streak } from './quiz'
 import { load, save } from './storage'
 
 // 仿 Duolingo：一次一題、自動對答案、答錯的題目排到最後再考一次
 type Props = { lines: string[]; storageKey: string; phrases?: Phrase[]; tempos?: Tempo[] }
 
 export function Lesson({ lines, storageKey, phrases, tempos = [] }: Props) {
+  const srsKey = storageKey.replace(/^lyrics:/, 'srs:')
   const player = useRef(new Player())
   const [queue, setQueue] = useState<Question[] | null>(null)
   const [all, setAll] = useState<Question[]>([])
@@ -27,7 +28,7 @@ export function Lesson({ lines, storageKey, phrases, tempos = [] }: Props) {
   }, [q])
 
   const start = () => {
-    const qs = makeLesson(lines, load<Marks>(storageKey, {}), Math.random, phrases)
+    const qs = makeLesson(lines, load<Marks>(storageKey, {}), Math.random, phrases, load<Srs>(srsKey, {}))
     setQueue(qs)
     setAll(qs)
     setPick(null)
@@ -35,13 +36,16 @@ export function Lesson({ lines, storageKey, phrases, tempos = [] }: Props) {
     setResult(null)
   }
 
-  if (!queue)
+  if (!queue) {
+    const due = dueCount(load<Srs>(srsKey, {}))
     return (
       <section className="lesson-start">
-        <p className="muted">每課 5 句、約 10–15 題，忘記的句子會優先出現。</p>
+        {due > 0 && <p className="due">📅 今天有 {due} 句要複習</p>}
+        <p className="muted">每課 5 句、約 10–15 題，該複習的句子會優先出現。</p>
         <button className="play" onClick={start}>開始闖關</button>
       </section>
     )
+  }
 
   if (!all.length) return <p className="muted">歌詞太少，沒辦法出題（至少要 2 句不同的歌詞）。</p>
 
@@ -54,6 +58,7 @@ export function Lesson({ lines, storageKey, phrases, tempos = [] }: Props) {
           {result.perfect} / {result.lines} 句一次就答對
         </p>
         <p className="streak">🔥 連續 {result.streak} 天</p>
+        <p className="muted">答對的句子過幾天再複習，答錯的明天再考。</p>
         <button className="play" onClick={start}>再一課</button>
       </section>
     )
@@ -73,6 +78,9 @@ export function Lesson({ lines, storageKey, phrases, tempos = [] }: Props) {
     const marks = load<Marks>(storageKey, {})
     for (const l of done) marks[l] = miss.has(l) ? 'miss' : 'ok'
     save(storageKey, marks)
+    const srs = load<Srs>(srsKey, {})
+    for (const l of done) srs[l] = review(srs[l], !miss.has(l), today())
+    save(srsKey, srs)
     const streak = bumpStreak(load<Streak>('streak', { day: '', n: 0 }), today(), yesterday())
     save('streak', streak)
     setResult({ lines: done.size, perfect: [...done].filter((l) => !miss.has(l)).length, streak: streak.n })

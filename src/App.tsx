@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { load, save } from './storage'
 import { Song } from './Song'
-import { liveStreak, type Streak } from './quiz'
+import { dueCount, liveStreak, type Srs, type Streak } from './quiz'
 
 export type SongEntry = { id: string; title: string; hasScore: boolean; voices: string[] }
 
@@ -59,6 +59,9 @@ export function App() {
                     <span>{s.title}</span>
                     <small className={s.voices.includes(voice) ? '' : 'muted'}>
                       {!s.voices.includes(voice) ? `沒有 ${voice}` : s.hasScore ? '完整' : '僅歌詞/音檔'}
+                      {dueCount(load<Srs>(`srs:${s.id}:${voice}`, {})) > 0 && (
+                        <span className="due"> · 📅 {dueCount(load<Srs>(`srs:${s.id}:${voice}`, {}))} 句待複習</span>
+                      )}
                     </small>
                   </a>
                 </li>

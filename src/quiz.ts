@@ -4,6 +4,10 @@ import { CJK, type Phrase } from './phrases'
 export type Question = { line: string; prompt: string; ask: string; answer: string; options: string[]; melody?: Note[] }
 export type Marks = Record<string, 'ok' | 'miss'>
 export type Streak = { day: string; n: number }
+// 間隔重複（Leitner 盒子）：一次就答對的句子往下一盒，間隔加倍；答錯回第 0 盒，隔天再考
+export type Card = { box: number; due: string }
+export type Srs = Record<string, Card>
+const INTERVALS = [1, 2, 4, 8, 16, 32] // 天
 
 const LINES_PER_LESSON = 5
 
@@ -25,12 +29,23 @@ const pickOptions = (answer: string, pool: string[], rnd: () => number) => {
 export const pieces = (line: string) => line.split(/(\s+)/).flatMap((w) => (CJK.test(w) ? (w.match(/.{1,2}/gu) ?? []) : [w]))
 const isWord = (p: string) => /\S/.test(p)
 
-// 每句出兩題：「下一句是？」和填空；有樂譜的話再加一題聽旋律選句。忘記的句子優先，再來沒練過的（照歌曲順序），最後是記得的。
 const tune = (p: Phrase) => p.notes.map((n) => `${n.midi}:${n.dur}`).join()
 
-export function makeLesson(lines: string[], marks: Marks, rnd = Math.random, phrases: Phrase[] = []): Question[] {
-  const rank = (l: string) => (marks[l] === 'miss' ? 0 : marks[l] === 'ok' ? 2 : 1)
-  const picked = [...new Set(lines)].sort((a, b) => rank(a) - rank(b) || lines.indexOf(a) - lines.indexOf(b)).slice(0, LINES_PER_LESSON)
+export function review(card: Card | undefined, right: boolean, day: string): Card {
+  const box = right ? Math.min((card?.box ?? -1) + 1, INTERVALS.length - 1) : 0
+  return { box, due: addDays(day, INTERVALS[box]) }
+}
+export const dueCount = (srs: Srs, day = today()) => Object.values(srs).filter((c) => c.due <= day).length
+
+// 每句出兩題：「下一句是？」和填空；有樂譜的話再加一題聽旋律選句。
+// 選句順序：到期該複習的 → 沒練過的（照歌曲順序）→ 還沒到期的（越早到期越前面）。
+// 舊資料只有「記得／忘了」沒有複習日期時，忘了的當作到期。
+export function makeLesson(lines: string[], marks: Marks, rnd = Math.random, phrases: Phrase[] = [], srs: Srs = {}, day = today()): Question[] {
+  const rank = (l: string) => (srs[l] ? (srs[l].due <= day ? 0 : 2) : marks[l] === 'miss' ? 0 : marks[l] === 'ok' ? 2 : 1)
+  const due = (l: string) => srs[l]?.due ?? ''
+  const picked = [...new Set(lines)]
+    .sort((a, b) => rank(a) - rank(b) || due(a).localeCompare(due(b)) || lines.indexOf(a) - lines.indexOf(b))
+    .slice(0, LINES_PER_LESSON)
   const allPieces = lines.flatMap(pieces).filter(isWord)
   const qs: Question[] = []
   for (const line of picked) {
@@ -64,7 +79,12 @@ export function bumpStreak(s: Streak, today: string, yesterday: string): Streak 
   return { day: today, n: s.day === yesterday ? s.n + 1 : 1 }
 }
 
-const ymd = (t: number) => new Date(t).toLocaleDateString('sv') // 本地時區的 YYYY-MM-DD
-export const today = () => ymd(Date.now())
-export const yesterday = () => ymd(Date.now() - 864e5)
+const ymd = (d: Date) => d.toLocaleDateString('sv') // 本地時區的 YYYY-MM-DD
+export const addDays = (day: string, n: number) => {
+  const d = new Date(`${day}T12:00`)
+  d.setDate(d.getDate() + n)
+  return ymd(d)
+}
+export const today = () => ymd(new Date())
+export const yesterday = () => addDays(today(), -1)
 export const liveStreak = (s: Streak) => (s.day === today() || s.day === yesterday() ? s.n : 0)

@@ -9,7 +9,7 @@ export function load<T>(key: string, fallback: T): T {
     /* 用記憶體裡的值 */
   }
   try {
-    return v == null ? fallback : (JSON.parse(v) as T)
+    return v == null ? fallback : ((JSON.parse(v) as T | null) ?? fallback)
   } catch {
     return fallback
   }
